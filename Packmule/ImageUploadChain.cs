@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Azure.WebJobs;
@@ -38,13 +37,11 @@ namespace Packmule
 
         [FunctionName("PackmuleStarter")]
         public async Task<HttpResponseMessage> HttpStart(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post")]HttpRequestMessage request,
+            [HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage request,
             [OrchestrationClient]DurableOrchestrationClient starter,
             ILogger log)
         {
             // TODO: Ascertain pass/fail and stash in BLOBS accordingly
-
-            // QOL: Function Proxy/Api
             // QOL: Middleware Response handler?
 
             var rawImage = await request.Content.ReadAsByteArrayAsync();
@@ -64,6 +61,7 @@ namespace Packmule
         public async Task RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
+            // QOL: Scan byte/size for sanity
             var ocrJobUri = await context.CallActivityAsync<string>("SubmitImage", context.GetInput<byte[]>());
             var recipients = await context.CallActivityAsync<IEnumerable<Notifications>>("ParseOcrResults", ocrJobUri);
             await context.CallActivityAsync("SendEmails", recipients);
