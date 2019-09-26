@@ -42,7 +42,7 @@ namespace Packmule
             ILogger log)
         {
             // TODO: Ascertain pass/fail and stash in BLOBS accordingly
-            // QOL: Middleware Response handler?
+            // QOL: Middleware Response handler? 
 
             var rawImage = await request.Content.ReadAsByteArrayAsync();
             if (rawImage == null || rawImage.Length == 0)
